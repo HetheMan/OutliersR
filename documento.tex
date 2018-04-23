@@ -1,0 +1,230 @@
+%%Memoria creada para la asignatura de 'extracción del conocimiento automatizado'
+%%En la universidad de 'Alcalá de Henares'
+\documentclass{article}\usepackage[]{graphicx}\usepackage[]{color}
+%% maxwidth is the original width if it is less than linewidth
+%% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi% 
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\usepackage[strings]{underscore}
+\usepackage[sc]{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{listings}
+\geometry{verbose,tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm,rmargin=2.5cm}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\usepackage{url}
+\usepackage[unicode=true,pdfusetitle,
+ bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
+ breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{
+ pdfstartview={XYZ null null 1}}
+\usepackage{breakurl}
+
+
+\title{\textbf{\huge Extracción Automática del Conocimiento R-PL5}}
+\author{Carlos Javier Tacón Fernández \and Alicia Tomás Martínez \and Zamar Elahi Fazal Roura}
+\date{\today}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+\maketitle
+
+\subsection{Ejercicio completo de detección de datos anómalos}
+Desarrollo por parte de cada alumno del enunciado y la solución de un ejercicio en el que se realicen análisis con R de detección de datos anómalos utilizando todos los me?todos vistos en teoría e introduciendo modificaciones sobre el ejercicio hecho en clase. 
+
+Para la realización de la tercera parte de la práctica vamos a usar un dataset encontrado en UCI que refleja 
+datos de ausentismo en el trabajo. \cite{dataset}.
+
+\subsubsection{Objetivos}
+Eliminar los 'outliers' o valores atípicos no es un procedimiento estándar y  quizá tampoco sea lo más correcto, sin embargo eliminarlos puede cambiar en gran medida
+el análisis de los datos, permitiendo hallar nuevos datos entre datos semejantes. 
+Para entender bien y visualizar cómo afecta el tratamiento de outliers vamos a:
+\begin {itemize}
+\item{Estudiar los dator tratandolos si es preciso}
+\item{Hallar la regresión linear previa al tratamiento de outliers.}
+\item{Realizar varios métodos para el tratamiento de outliers.}
+\item{Hallar la regresión linear posterior al tratamiento de outliers.}
+\end {itemize}
+
+Los métodos que vamos a usar y demostrar para el tratamiento de los valores aítpicos son:
+\begin {itemize}
+\item{K-Vecinos}
+\item{B}
+\item{C}
+\item{D}
+\end {itemize}
+\subsubsection{Manipulación de los datos.}
+Nuestra muestra trata sobre las ausencias que realizan ciertos empleados en una empresa. Vamos a echar un rápido vistazo a nuestra muestra.
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#Primero la cargamos}
+\hlstd{data}\hlkwb{<-} \hlkwd{read.csv}\hlstd{(}\hlkwc{file}\hlstd{=}\hlstr{"data/Absenteeism_at_work.csv"}\hlstd{,} \hlkwc{header}\hlstd{=}\hlnum{TRUE}\hlstd{,} \hlkwc{sep}\hlstd{=}\hlstr{";"}\hlstd{)}
+\hlkwd{colnames}\hlstd{(data)}
+\end{alltt}
+\begin{verbatim}
+##  [1] "ID"                              "Reason.for.absence"             
+##  [3] "Month.of.absence"                "Day.of.the.week"                
+##  [5] "Seasons"                         "Transportation.expense"         
+##  [7] "Distance.from.Residence.to.Work" "Service.time"                   
+##  [9] "Age"                             "Work.load.Average.day"          
+## [11] "Hit.target"                      "Disciplinary.failure"           
+## [13] "Education"                       "Son"                            
+## [15] "Social.drinker"                  "Social.smoker"                  
+## [17] "Pet"                             "Weight"                         
+## [19] "Height"                          "Body.mass.index"                
+## [21] "Absenteeism.time.in.hours"
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+Vamos a mirar cómo están distribuidos los datos:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{head}\hlstd{(data}\hlopt{$}\hlstd{ID)}
+\end{alltt}
+\begin{verbatim}
+## [1] 11 36  3  7 11  3
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+Podemos observar que se crea una fila por cada ausencia y no por cada empleado, observando la descripción del dataset \cite{dataset} vemos que existen valores constantes (cómo edad, peso, altura...) y
+otros valores como 'Reason of absense' qué son la razón de por qué se hace una fila por ausencia si no que queremos un conjunto similar de empleados de edades similares y número de ausencias parecidas. 
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#Filas por ausencia}
+\hlkwd{nrow}\hlstd{(data)}
+\end{alltt}
+\begin{verbatim}
+## [1] 740
+\end{verbatim}
+\begin{alltt}
+\hlcom{#Filas por empleado}
+\hlkwd{nrow}\hlstd{(}\hlkwd{table}\hlstd{(}\hlkwd{unique}\hlstd{(data}\hlopt{$}\hlstd{ID)))}
+\end{alltt}
+\begin{verbatim}
+## [1] 36
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+Para nuestro estudio \textbf{no} querémos eliminar a los empleados que tengan \textit{ciertos tipos de ausencia}. Queremos eliminar aquellos empleados outliers por edad y número de ausencias.
+Por ejemplo, para nuestra empresa un empleado muy mayor apunto de jubilarse puede ser un valor atípico 
+(suelen hacer más visitas al centro médico) o alguien de 28 años que es un hipocondríaco que tiene más de 100 ausencias y también puede ser un valor atípico.
+
+Por lo tanto tenemos que manipular la estructura de los datos para hacer una fila por empleado y obtener su numero de ausencias.
+
+
+Esta parte es sencilla, creamos una nueva tabla de datos quitando los duplicados y obteniendo el número de ausencias cómo la frecuencia absoluta de cada empleado [ID] (ya que había una fila para cada ausencia de un empleado).
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{empleados} \hlkwb{=} \hlstd{data[}\hlopt{!}\hlkwd{duplicated}\hlstd{(data}\hlopt{$}\hlstd{ID),]}
+\hlcom{#Ordenamos}
+\hlstd{empleados} \hlkwb{=} \hlstd{empleados[}\hlkwd{order}\hlstd{(empleados}\hlopt{$}\hlstd{ID),]}
+\hlcom{#Sacar número de ausencias con la frecuenci absoluta.}
+\hlstd{empleados}\hlopt{$}\hlstd{NumAusencias} \hlkwb{=} \hlkwd{as.numeric}\hlstd{(}\hlkwd{table}\hlstd{(data}\hlopt{$}\hlstd{ID))}
+\hlcom{#Vemos que hay tantas filas como empleados}
+\hlkwd{nrow}\hlstd{(empleados)}
+\end{alltt}
+\begin{verbatim}
+## [1] 36
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+\subsubsection{Estudio de la muestra}
+\begin{knitrout}\scriptsize
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{#Usamos ggplot2 - library(ggplot2)}
+\hlcom{# Referencia: http://t-redactyl.io/blog/2016/05/creating-plots-in-r-using-ggplot2-part-11-linear-regression-plots.html}
+\hlstd{lm} \hlkwb{<-} \hlkwd{lm}\hlstd{(NumAusencias} \hlopt{~} \hlstd{Age,} \hlkwc{data} \hlstd{= empleados)}
+\hlstd{alpha} \hlkwb{<-} \hlkwd{as.numeric}\hlstd{(lm}\hlopt{$}\hlstd{coefficients[}\hlnum{1}\hlstd{])}
+\hlstd{beta} \hlkwb{<-} \hlkwd{as.numeric}\hlstd{(lm}\hlopt{$}\hlstd{coefficients[}\hlnum{2}\hlstd{])}
+\hlstd{Rcuadrado} \hlkwb{<-} \hlkwd{summary}\hlstd{(lm)}\hlopt{$}\hlstd{r.squared}
+\hlstd{dispersion} \hlkwb{<-} \hlkwd{ggplot}\hlstd{(empleados,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=Age,}\hlkwc{y}\hlstd{=NumAusencias))} \hlopt{+} \hlkwd{geom_point}\hlstd{()} \hlopt{+} \hlkwd{geom_smooth}\hlstd{(}\hlkwc{method}\hlstd{=}\hlstr{'lm'}\hlstd{,}\hlkwc{se}\hlstd{=}\hlnum{FALSE}\hlstd{)} \hlopt{+}
+  \hlkwd{ggtitle}\hlstd{(}\hlstr{"Empleados"}\hlstd{)}\hlopt{+}
+  \hlkwd{annotate}\hlstd{(}\hlstr{"rect"}\hlstd{,} \hlkwc{xmin} \hlstd{=} \hlnum{52}\hlstd{,} \hlkwc{xmax} \hlstd{=} \hlnum{58}\hlstd{,} \hlkwc{ymin} \hlstd{=} \hlnum{40}\hlstd{,} \hlkwc{ymax} \hlstd{=} \hlnum{60}\hlstd{,} \hlkwc{fill}\hlstd{=}\hlstr{"white"}\hlstd{,} \hlkwc{colour}\hlstd{=}\hlstr{"red"}\hlstd{)} \hlopt{+}
+  \hlkwd{annotate}\hlstd{(}\hlstr{"text"}\hlstd{,} \hlkwc{x}\hlstd{=}\hlnum{55}\hlstd{,} \hlkwc{y}\hlstd{=}\hlnum{55}\hlstd{,} \hlkwc{label} \hlstd{=} \hlkwd{paste}\hlstd{(}\hlstr{"R^2 == "}\hlstd{, Rcuadrado),} \hlkwc{parse}\hlstd{=T)} \hlopt{+}
+  \hlkwd{annotate}\hlstd{(}\hlstr{"text"}\hlstd{,} \hlkwc{x}\hlstd{=}\hlnum{55}\hlstd{,} \hlkwc{y}\hlstd{=}\hlnum{50}\hlstd{,} \hlkwc{label} \hlstd{=} \hlkwd{paste}\hlstd{(}\hlstr{"alpha == "}\hlstd{,alpha),} \hlkwc{parse}\hlstd{=T)} \hlopt{+}
+  \hlkwd{annotate}\hlstd{(}\hlstr{"text"}\hlstd{,} \hlkwc{x}\hlstd{=}\hlnum{55}\hlstd{,} \hlkwc{y}\hlstd{=}\hlnum{45}\hlstd{,} \hlkwc{label} \hlstd{=} \hlkwd{paste}\hlstd{(}\hlstr{"beta == "}\hlstd{,beta),} \hlkwc{parse}\hlstd{=T)}
+\hlstd{dispersion}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/minimal-figura-dispersion1-1} 
+
+}
+
+
+
+\end{knitrout}
+La calidad de la recta de regresión es muy baja \textbf{(0.0308742)}, vamos a ver si eliminando valores atípicos podemos mejorarla.
+\subsubsection{K-Vecinos}
+Para la realización de esta parte de la práctica vamos a hacer uso de la funcion knn \cite{Knn}disponible en el paquete class, y el paquete gmodels para garantizar la precision de los valores
+
+Para ello cargamos los paquetes y guardamos una copia de los datos:
+
+\begin{thebibliography}{9}
+    \bibitem{dataset}
+      Data Set,
+      \textit{https://archive.ics.uci.edu/ml/datasets/Absenteeism+at+work},
+      UCI.
+	  \bibitem{Knn}
+      Uso Knn,
+      \textit{https://www.analyticsvidhya.com/blog/2015/08/learning-concept-knn-algorithms-programming/},
+      analyticsvidhya.
+\end{thebibliography}
+
+
+
+\end{document}

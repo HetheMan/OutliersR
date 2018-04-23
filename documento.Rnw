@@ -1,0 +1,132 @@
+%%Memoria creada para la asignatura de 'extracción del conocimiento automatizado'
+%%En la universidad de 'Alcalá de Henares'
+\documentclass{article}
+\usepackage[strings]{underscore}
+\usepackage[sc]{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{listings}
+\geometry{verbose,tmargin=2.5cm,bmargin=2.5cm,lmargin=2.5cm,rmargin=2.5cm}
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\usepackage{url}
+\usepackage[unicode=true,pdfusetitle,
+ bookmarks=true,bookmarksnumbered=true,bookmarksopen=true,bookmarksopenlevel=2,
+ breaklinks=false,pdfborder={0 0 1},backref=false,colorlinks=false]
+ {hyperref}
+\hypersetup{
+ pdfstartview={XYZ null null 1}}
+\usepackage{breakurl}
+
+<<setup, include=FALSE, cache=FALSE>>=
+library(knitr)
+library(ggplot2)
+# set global chunk options
+opts_chunk$set(fig.path='figure/minimal-', fig.align='center', fig.show='hold')
+options(formatR.arrow=TRUE,width=90)
+@
+\title{\textbf{\huge Extracción Automática del Conocimiento R-PL5}}
+\author{Carlos Javier Tacón Fernández \and Alicia Tomás Martínez \and Zamar Elahi Fazal Roura}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\subsection{Ejercicio completo de detección de datos anómalos}
+Desarrollo por parte de cada alumno del enunciado y la solución de un ejercicio en el que se realicen análisis con R de detección de datos anómalos utilizando todos los me?todos vistos en teoría e introduciendo modificaciones sobre el ejercicio hecho en clase. 
+
+Para la realización de la tercera parte de la práctica vamos a usar un dataset encontrado en UCI que refleja 
+datos de ausentismo en el trabajo. \cite{dataset}.
+
+\subsubsection{Objetivos}
+Eliminar los 'outliers' o valores atípicos no es un procedimiento estándar y  quizá tampoco sea lo más correcto, sin embargo eliminarlos puede cambiar en gran medida
+el análisis de los datos, permitiendo hallar nuevos datos entre datos semejantes. 
+Para entender bien y visualizar cómo afecta el tratamiento de outliers vamos a:
+\begin {itemize}
+\item{Estudiar los dator tratandolos si es preciso}
+\item{Hallar la regresión linear previa al tratamiento de outliers.}
+\item{Realizar varios métodos para el tratamiento de outliers.}
+\item{Hallar la regresión linear posterior al tratamiento de outliers.}
+\end {itemize}
+
+Los métodos que vamos a usar y demostrar para el tratamiento de los valores aítpicos son:
+\begin {itemize}
+\item{K-Vecinos}
+\item{B}
+\item{C}
+\item{D}
+\end {itemize}
+\subsubsection{Manipulación de los datos.}
+Nuestra muestra trata sobre las ausencias que realizan ciertos empleados en una empresa. Vamos a echar un rápido vistazo a nuestra muestra.
+<<>>=
+#Primero la cargamos
+data<- read.csv(file="data/Absenteeism_at_work.csv", header=TRUE, sep=";")
+colnames(data)
+@
+
+Vamos a mirar cómo están distribuidos los datos:
+<<>>=
+head(data$ID)
+@
+Podemos observar que se crea una fila por cada ausencia y no por cada empleado, observando la descripción del dataset \cite{dataset} vemos que existen valores constantes (cómo edad, peso, altura...) y
+otros valores como 'Reason of absense' qué son la razón de por qué se hace una fila por ausencia si no que queremos un conjunto similar de empleados de edades similares y número de ausencias parecidas. 
+
+<<>>=
+#Filas por ausencia
+nrow(data)
+#Filas por empleado
+nrow(table(unique(data$ID)))
+@
+Para nuestro estudio \textbf{no} querémos eliminar a los empleados que tengan \textit{ciertos tipos de ausencia}. Queremos eliminar aquellos empleados outliers por edad y número de ausencias.
+Por ejemplo, para nuestra empresa un empleado muy mayor apunto de jubilarse puede ser un valor atípico 
+(suelen hacer más visitas al centro médico) o alguien de 28 años que es un hipocondríaco que tiene más de 100 ausencias y también puede ser un valor atípico.
+
+Por lo tanto tenemos que manipular la estructura de los datos para hacer una fila por empleado y obtener su numero de ausencias.
+
+
+Esta parte es sencilla, creamos una nueva tabla de datos quitando los duplicados y obteniendo el número de ausencias cómo la frecuencia absoluta de cada empleado [ID] (ya que había una fila para cada ausencia de un empleado).
+<<>>=
+empleados = data[!duplicated(data$ID),]
+#Ordenamos
+empleados = empleados[order(empleados$ID),]
+#Sacar número de ausencias con la frecuenci absoluta.
+empleados$NumAusencias = as.numeric(table(data$ID))
+#Vemos que hay tantas filas como empleados
+nrow(empleados)
+@
+\subsubsection{Estudio de la muestra}
+<<figura-dispersion1,fig.width=8,fig.height=8,size='scriptsize'>>=
+#Usamos ggplot2 - library(ggplot2)
+# Referencia: http://t-redactyl.io/blog/2016/05/creating-plots-in-r-using-ggplot2-part-11-linear-regression-plots.html
+lm <- lm(NumAusencias ~ Age, data = empleados)
+alpha <- as.numeric(lm$coefficients[1])
+beta <- as.numeric(lm$coefficients[2])
+Rcuadrado <- summary(lm)$r.squared
+dispersion <- ggplot(empleados, aes(x=Age,y=NumAusencias)) + geom_point() + geom_smooth(method='lm',se=FALSE) + 
+  ggtitle("Empleados")+
+  annotate("rect", xmin = 52, xmax = 58, ymin = 40, ymax = 60, fill="white", colour="red") + 
+  annotate("text", x=55, y=55, label = paste("R^2 == ", Rcuadrado), parse=T) + 
+  annotate("text", x=55, y=50, label = paste("alpha == ",alpha), parse=T) +
+  annotate("text", x=55, y=45, label = paste("beta == ",beta), parse=T)
+dispersion
+@
+La calidad de la recta de regresión es muy baja \textbf{(\Sexpr{Rcuadrado})}, vamos a ver si eliminando valores atípicos podemos mejorarla.
+\subsubsection{K-Vecinos}
+Para la realización de esta parte de la práctica vamos a hacer uso de la funcion knn \cite{Knn}disponible en el paquete class, y el paquete gmodels para garantizar la precision de los valores
+
+Para ello cargamos los paquetes y guardamos una copia de los datos:
+
+\begin{thebibliography}{9}
+    \bibitem{dataset}
+      Data Set,
+      \textit{https://archive.ics.uci.edu/ml/datasets/Absenteeism+at+work},
+      UCI.
+	  \bibitem{Knn}
+      Uso Knn,
+      \textit{https://www.analyticsvidhya.com/blog/2015/08/learning-concept-knn-algorithms-programming/},
+      analyticsvidhya.
+\end{thebibliography}
+
+
+
+\end{document}
