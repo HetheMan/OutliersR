@@ -35,7 +35,7 @@ options(formatR.arrow=TRUE,width=90)
 \subsection{Ejercicio completo de detección de datos anómalos}
 Desarrollo por parte de cada alumno del enunciado y la solución de un ejercicio en el que se realicen análisis con R de detección de datos anómalos utilizando todos los me?todos vistos en teoría e introduciendo modificaciones sobre el ejercicio hecho en clase. 
 
-Para la realización de la tercera parte de la práctica vamos a usar un dataset encontrado en UCI que refleja 
+Para la realización de la última parte de la práctica vamos a usar un dataset encontrado en UCI que refleja 
 datos de ausentismo en el trabajo. \cite{dataset}.
 
 \subsubsection{Objetivos}
@@ -98,20 +98,51 @@ nrow(empleados)
 <<figura-dispersion1,fig.width=8,fig.height=8,size='scriptsize'>>=
 #Usamos ggplot2 - library(ggplot2)
 # Referencia: http://t-redactyl.io/blog/2016/05/creating-plots-in-r-using-ggplot2-part-11-linear-regression-plots.html
-lm <- lm(NumAusencias ~ Age, data = empleados)
+#Creamos una funcion para uso futuro.
+Rcuadrado = 0
+regresion_plot<-function(data,independent,dependent){
+lm <- lm(dependent ~ independent, data = data)
 alpha <- as.numeric(lm$coefficients[1])
 beta <- as.numeric(lm$coefficients[2])
 Rcuadrado <- summary(lm)$r.squared
-dispersion <- ggplot(empleados, aes(x=Age,y=NumAusencias)) + geom_point() + geom_smooth(method='lm',se=FALSE) + 
-  ggtitle("Empleados")+
-  annotate("rect", xmin = 52, xmax = 58, ymin = 40, ymax = 60, fill="white", colour="red") + 
-  annotate("text", x=55, y=55, label = paste("R^2 == ", Rcuadrado), parse=T) + 
-  annotate("text", x=55, y=50, label = paste("alpha == ",alpha), parse=T) +
-  annotate("text", x=55, y=45, label = paste("beta == ",beta), parse=T)
+#Ahora pintamos
+dispersion <- ggplot(data, aes(x=independent,y=dependent)) + geom_point() + geom_smooth(method='lm',se=FALSE) +
+annotate("rect", xmin = 52, xmax = 58, ymin = 40, ymax = 60, fill="white", colour="red") +
+      annotate("text", x=55, y=55, label = paste("R^2 == ", Rcuadrado), parse=T) + annotate("text", x=55, y=50, label = paste("alpha == ",alpha), parse=T) +
+      annotate("text", x=55, y=45, label = paste("beta == ",beta), parse=T)
 dispersion
+}
+regresion_plot(empleados,empleados$Age,empleados$NumAusencias)
 @
-La calidad de la recta de regresión es muy baja \textbf{(\Sexpr{Rcuadrado})}, vamos a ver si eliminando valores atípicos podemos mejorarla.
+La calidad de la recta de regresión es muy baja \textbf{(\Sexpr{Rcuadrado})}, vamos a ver si eliminando valores atípico podemos mejorarla.
 \subsubsection{K-Vecinos}
+<<figura-kvecinos2,fig.width=8,fig.width=8>>=
+AuxEmpleados = empleados[,c("Age","NumAusencias")]
+#K=3 serían los dos vecinos más cercanos.
+k=3
+kVecinos = nn2(AuxEmpleados, k = k)
+distancias = kVecinos$nn.dists
+#Vamos a eliminar los outliers y crear un nuevo dataframe
+empleadosK = empleados
+empleadosK$ID
+eliminar = c()
+for(i in 1:length(distancias[,k])){
+      if(distancias[i,k]>10){
+            #Print paste para imprimir todo junto
+            print(paste("Empleado: ",i," es un suceso anomalo"))
+            eliminar <- append(eliminar,i)
+      }
+}
+empleadosK=empleadosK[-eliminar,]
+regresion_plot(empleadosK,empleadosK$Age,empleadosK$NumAusencias)
+@
+Aún eliminando outliers no conseguimos obtener una gran mejora en la calidad de la recta de regresión.
+
+\subsubsection{Cajas y Bigotes}
+\subsubsection{Desviación típica}
+\subsubsection{Regresión} 
+
+
 Para la realización de esta parte de la práctica vamos a hacer uso de la funcion knn \cite{Knn}disponible en el paquete class, y el paquete gmodels para garantizar la precision de los valores
 
 Para ello cargamos los paquetes y guardamos una copia de los datos:

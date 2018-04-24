@@ -1,0 +1,51 @@
+library("foreign")
+muestra=read.spss("cardata.sav")
+#Diagrama de Barras
+origin=muestra$origin
+frecabsorigin =table(origin); names(frecabsorigin)=c("Europa","America","Japón");
+barplot(frecabsorigin)
+#REALMENTE DIAGRAMA DE BARRAS.
+barplot(frecabsorigin,horiz=TRUE,col=6)
+
+#Diagrama de Pareto
+frecabsoriginord = sort(frecabsorigin,decreasn=TRUE)
+#Las = 1? col = color.
+#las coge los numeros del os ejes horizontales y los pone verticales.
+barplot(frecabsoriginord,las=1,col=1)
+
+#Histograma
+#Datos continuos
+mpg=muestra$mpg
+mpg=mpg[!is.na(mpg)]
+#limpiamos
+hist(mpg)
+#breaks, cambiar el numero de clases, cortes donde queremos, queremos hacer 12 cortes.
+hist(mpg,break=seq(15.5,46,6, by=(46.6-15.5)/12))
+
+#Diagrama de Tallo y Hojas.
+#USELESS
+stem(mpg) #Solo dibuja numeros pares
+stem(mpg,scale=2)
+#Shiny, utilizarlo. 
+#Diagrama de Cajas y Bigotes.
+boxplot(mpg)
+boxplot(mpg,horizontal=TRUE)
+
+
+
+#SEGUNDA PARTE 
+
+D=read.spss("cardata.sav")
+op=par(mfrow=C(2,2)) #Abrir matriz de 2 por 2 y cargarla de graficos.
+mfcol=c(2,2)
+mfrow=1
+
+plot(D$mpg,D$horsepower)
+plot(D$mpg,D$accel)
+plot(D$mpg,D$weight)
+plot(D$mpg,D$price)
+hfm=lm(horsepower~1+mpg,data=D); afm=lm(accel~1+mpg,data=D); wfm=lm(weight~1+mpg,data=D); pfm=lm(price~1+mpg,data=D);
+abline(hfm); abline(afm);abline(wfm);abline(pfm);
+#Seria una a una.
+
+

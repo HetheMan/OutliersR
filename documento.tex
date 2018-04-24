@@ -3,7 +3,7 @@
 \documentclass{article}\usepackage[]{graphicx}\usepackage[]{color}
 %% maxwidth is the original width if it is less than linewidth
 %% otherwise use linewidth (to make sure the graphics do not exceed the margin)
-\makeatletter
+\makeatletter   
 \def\maxwidth{ %
   \ifdim\Gin@nat@width>\linewidth
     \linewidth
@@ -32,7 +32,7 @@
  \ifinner\ifhmode%
   \def\at@end@of@kframe{\end{minipage}}%
   \begin{minipage}{\columnwidth}%
- \fi\fi% 
+ \fi\fi%
  \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
  \colorbox{shadecolor}{##1}\hskip-\fboxsep
      % There is no \\@totalrightmargin, so:
@@ -79,7 +79,7 @@
 \subsection{Ejercicio completo de detección de datos anómalos}
 Desarrollo por parte de cada alumno del enunciado y la solución de un ejercicio en el que se realicen análisis con R de detección de datos anómalos utilizando todos los me?todos vistos en teoría e introduciendo modificaciones sobre el ejercicio hecho en clase. 
 
-Para la realización de la tercera parte de la práctica vamos a usar un dataset encontrado en UCI que refleja 
+Para la realización de la última parte de la práctica vamos a usar un dataset encontrado en UCI que refleja 
 datos de ausentismo en el trabajo. \cite{dataset}.
 
 \subsubsection{Objetivos}
@@ -187,17 +187,20 @@ Esta parte es sencilla, creamos una nueva tabla de datos quitando los duplicados
 \begin{alltt}
 \hlcom{#Usamos ggplot2 - library(ggplot2)}
 \hlcom{# Referencia: http://t-redactyl.io/blog/2016/05/creating-plots-in-r-using-ggplot2-part-11-linear-regression-plots.html}
-\hlstd{lm} \hlkwb{<-} \hlkwd{lm}\hlstd{(NumAusencias} \hlopt{~} \hlstd{Age,} \hlkwc{data} \hlstd{= empleados)}
+\hlcom{#Creamos una funcion para uso futuro.}
+\hlstd{Rcuadrado} \hlkwb{=} \hlnum{0}
+\hlstd{regresion_plot}\hlkwb{<-}\hlkwa{function}\hlstd{(}\hlkwc{data}\hlstd{,}\hlkwc{independent}\hlstd{,}\hlkwc{dependent}\hlstd{)\{}
+\hlstd{lm} \hlkwb{<-} \hlkwd{lm}\hlstd{(dependent} \hlopt{~} \hlstd{independent,} \hlkwc{data} \hlstd{= data)}
 \hlstd{alpha} \hlkwb{<-} \hlkwd{as.numeric}\hlstd{(lm}\hlopt{$}\hlstd{coefficients[}\hlnum{1}\hlstd{])}
 \hlstd{beta} \hlkwb{<-} \hlkwd{as.numeric}\hlstd{(lm}\hlopt{$}\hlstd{coefficients[}\hlnum{2}\hlstd{])}
 \hlstd{Rcuadrado} \hlkwb{<-} \hlkwd{summary}\hlstd{(lm)}\hlopt{$}\hlstd{r.squared}
-\hlstd{dispersion} \hlkwb{<-} \hlkwd{ggplot}\hlstd{(empleados,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=Age,}\hlkwc{y}\hlstd{=NumAusencias))} \hlopt{+} \hlkwd{geom_point}\hlstd{()} \hlopt{+} \hlkwd{geom_smooth}\hlstd{(}\hlkwc{method}\hlstd{=}\hlstr{'lm'}\hlstd{,}\hlkwc{se}\hlstd{=}\hlnum{FALSE}\hlstd{)} \hlopt{+}
-  \hlkwd{ggtitle}\hlstd{(}\hlstr{"Empleados"}\hlstd{)}\hlopt{+}
-  \hlkwd{annotate}\hlstd{(}\hlstr{"rect"}\hlstd{,} \hlkwc{xmin} \hlstd{=} \hlnum{52}\hlstd{,} \hlkwc{xmax} \hlstd{=} \hlnum{58}\hlstd{,} \hlkwc{ymin} \hlstd{=} \hlnum{40}\hlstd{,} \hlkwc{ymax} \hlstd{=} \hlnum{60}\hlstd{,} \hlkwc{fill}\hlstd{=}\hlstr{"white"}\hlstd{,} \hlkwc{colour}\hlstd{=}\hlstr{"red"}\hlstd{)} \hlopt{+}
-  \hlkwd{annotate}\hlstd{(}\hlstr{"text"}\hlstd{,} \hlkwc{x}\hlstd{=}\hlnum{55}\hlstd{,} \hlkwc{y}\hlstd{=}\hlnum{55}\hlstd{,} \hlkwc{label} \hlstd{=} \hlkwd{paste}\hlstd{(}\hlstr{"R^2 == "}\hlstd{, Rcuadrado),} \hlkwc{parse}\hlstd{=T)} \hlopt{+}
-  \hlkwd{annotate}\hlstd{(}\hlstr{"text"}\hlstd{,} \hlkwc{x}\hlstd{=}\hlnum{55}\hlstd{,} \hlkwc{y}\hlstd{=}\hlnum{50}\hlstd{,} \hlkwc{label} \hlstd{=} \hlkwd{paste}\hlstd{(}\hlstr{"alpha == "}\hlstd{,alpha),} \hlkwc{parse}\hlstd{=T)} \hlopt{+}
-  \hlkwd{annotate}\hlstd{(}\hlstr{"text"}\hlstd{,} \hlkwc{x}\hlstd{=}\hlnum{55}\hlstd{,} \hlkwc{y}\hlstd{=}\hlnum{45}\hlstd{,} \hlkwc{label} \hlstd{=} \hlkwd{paste}\hlstd{(}\hlstr{"beta == "}\hlstd{,beta),} \hlkwc{parse}\hlstd{=T)}
+\hlstd{dispersion} \hlkwb{<-} \hlkwd{ggplot}\hlstd{(data,} \hlkwd{aes}\hlstd{(}\hlkwc{x}\hlstd{=independent,}\hlkwc{y}\hlstd{=dependent))} \hlopt{+} \hlkwd{geom_point}\hlstd{()} \hlopt{+} \hlkwd{geom_smooth}\hlstd{(}\hlkwc{method}\hlstd{=}\hlstr{'lm'}\hlstd{,}\hlkwc{se}\hlstd{=}\hlnum{FALSE}\hlstd{)} \hlopt{+}
+\hlkwd{annotate}\hlstd{(}\hlstr{"rect"}\hlstd{,} \hlkwc{xmin} \hlstd{=} \hlnum{52}\hlstd{,} \hlkwc{xmax} \hlstd{=} \hlnum{58}\hlstd{,} \hlkwc{ymin} \hlstd{=} \hlnum{40}\hlstd{,} \hlkwc{ymax} \hlstd{=} \hlnum{60}\hlstd{,} \hlkwc{fill}\hlstd{=}\hlstr{"white"}\hlstd{,} \hlkwc{colour}\hlstd{=}\hlstr{"red"}\hlstd{)} \hlopt{+}
+      \hlkwd{annotate}\hlstd{(}\hlstr{"text"}\hlstd{,} \hlkwc{x}\hlstd{=}\hlnum{55}\hlstd{,} \hlkwc{y}\hlstd{=}\hlnum{55}\hlstd{,} \hlkwc{label} \hlstd{=} \hlkwd{paste}\hlstd{(}\hlstr{"R^2 == "}\hlstd{, Rcuadrado),} \hlkwc{parse}\hlstd{=T)} \hlopt{+} \hlkwd{annotate}\hlstd{(}\hlstr{"text"}\hlstd{,} \hlkwc{x}\hlstd{=}\hlnum{55}\hlstd{,} \hlkwc{y}\hlstd{=}\hlnum{50}\hlstd{,} \hlkwc{label} \hlstd{=} \hlkwd{paste}\hlstd{(}\hlstr{"alpha == "}\hlstd{,alpha),} \hlkwc{parse}\hlstd{=T)} \hlopt{+}
+      \hlkwd{annotate}\hlstd{(}\hlstr{"text"}\hlstd{,} \hlkwc{x}\hlstd{=}\hlnum{55}\hlstd{,} \hlkwc{y}\hlstd{=}\hlnum{45}\hlstd{,} \hlkwc{label} \hlstd{=} \hlkwd{paste}\hlstd{(}\hlstr{"beta == "}\hlstd{,beta),} \hlkwc{parse}\hlstd{=T)}
 \hlstd{dispersion}
+\hlstd{\}}
+\hlkwd{regresion_plot}\hlstd{(empleados,empleados}\hlopt{$}\hlstd{Age,empleados}\hlopt{$}\hlstd{NumAusencias)}
 \end{alltt}
 \end{kframe}
 
@@ -208,8 +211,56 @@ Esta parte es sencilla, creamos una nueva tabla de datos quitando los duplicados
 
 
 \end{knitrout}
-La calidad de la recta de regresión es muy baja \textbf{(0.0308742)}, vamos a ver si eliminando valores atípicos podemos mejorarla.
+La calidad de la recta de regresión es muy baja \textbf{(0)}, vamos a ver si eliminando valores atípico podemos mejorarla.
 \subsubsection{K-Vecinos}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{AuxEmpleados} \hlkwb{=} \hlstd{empleados[,}\hlkwd{c}\hlstd{(}\hlstr{"Age"}\hlstd{,}\hlstr{"NumAusencias"}\hlstd{)]}
+\hlcom{#K=3 serían los dos vecinos más cercanos.}
+\hlstd{k}\hlkwb{=}\hlnum{3}
+\hlstd{kVecinos} \hlkwb{=} \hlkwd{nn2}\hlstd{(AuxEmpleados,} \hlkwc{k} \hlstd{= k)}
+\hlstd{distancias} \hlkwb{=} \hlstd{kVecinos}\hlopt{$}\hlstd{nn.dists}
+\hlcom{#Vamos a eliminar los outliers y crear un nuevo dataframe}
+\hlstd{empleadosK} \hlkwb{=} \hlstd{empleados}
+\hlstd{empleadosK}\hlopt{$}\hlstd{ID}
+\end{alltt}
+\begin{verbatim}
+##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28
+## [29] 29 30 31 32 33 34 35 36
+\end{verbatim}
+\begin{alltt}
+\hlstd{eliminar} \hlkwb{=} \hlkwd{c}\hlstd{()}
+\hlkwa{for}\hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlkwd{length}\hlstd{(distancias[,k]))\{}
+      \hlkwa{if}\hlstd{(distancias[i,k]}\hlopt{>}\hlnum{10}\hlstd{)\{}
+            \hlcom{#Print paste para imprimir todo junto}
+            \hlkwd{print}\hlstd{(}\hlkwd{paste}\hlstd{(}\hlstr{"Empleado: "}\hlstd{,i,}\hlstr{" es un suceso anomalo"}\hlstd{))}
+            \hlstd{eliminar} \hlkwb{<-} \hlkwd{append}\hlstd{(eliminar,i)}
+      \hlstd{\}}
+\hlstd{\}}
+\end{alltt}
+\begin{verbatim}
+## [1] "Empleado:  3  es un suceso anomalo"
+## [1] "Empleado:  28  es un suceso anomalo"
+## [1] "Empleado:  34  es un suceso anomalo"
+## [1] "Empleado:  36  es un suceso anomalo"
+\end{verbatim}
+\begin{alltt}
+\hlstd{empleadosK}\hlkwb{=}\hlstd{empleadosK[}\hlopt{-}\hlstd{eliminar,]}
+\hlkwd{regresion_plot}\hlstd{(empleadosK,empleadosK}\hlopt{$}\hlstd{Age,empleadosK}\hlopt{$}\hlstd{NumAusencias)}
+\end{alltt}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/minimal-figura-kvecinos2-1} 
+
+}
+
+
+
+\end{knitrout}
+Aún eliminando outliers no conseguimos obtener una gran mejora en la calidad de la recta de regresión. 
+
+
 Para la realización de esta parte de la práctica vamos a hacer uso de la funcion knn \cite{Knn}disponible en el paquete class, y el paquete gmodels para garantizar la precision de los valores
 
 Para ello cargamos los paquetes y guardamos una copia de los datos:
